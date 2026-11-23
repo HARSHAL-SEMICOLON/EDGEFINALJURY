@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Smart Retail · Central Dashboard</title>
+<style>
+  :root{--bg:#eef0ec;--card:#fff;--ink:#1b2320;--muted:#69736e;--line:#e1e5df;--brand:#1f5c4f;
+        --crit:#c0392b;--reorder:#d9822b;--over:#3b6fb6;--ok:#2e8b57;--stock:#b9c4be;--dem:#1f5c4f}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 "Segoe UI",system-ui,sans-serif}
+  header{background:#18211e;color:#fff;padding:14px 28px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  header h1{margin:0;font-size:19px;font-weight:650}
+  header .sub{font-size:12.5px;opacity:.75}
+  .right{margin-left:auto;display:flex;gap:8px;align-items:center;font-size:12.5px;flex-wrap:wrap}
+  .chip{border:1px solid rgba(255,255,255,.25);padding:4px 10px;border-radius:99px;display:flex;gap:6px;align-items:center}
+  .dot{width:8px;height:8px;border-radius:50%;display:inline-block;background:#aaa}.on{background:#5be08f}.off{background:#ff8a7a}
+  main{max-width:1380px;margin:0 auto;padding:20px 24px 50px}
+  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+  @media(max-width:1000px){.kpis{grid-template-columns:repeat(2,1fr)}}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+  .kpi b{display:block;font-size:28px;line-height:1.1;margin-top:4px;font-variant-numeric:tabular-nums}
+  .kpi span{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+  .kpi small{color:var(--muted);font-size:12px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .card h2{font-size:12.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 12px;font-weight:650}
+  .g2{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;margin-top:16px}
+  @media(max-width:1000px){.g2{grid-template-columns:1fr}}
+  .tabs{display:flex;gap:6px;margin:18px 0 0}
+  .tab{padding:7px 14px;border-radius:99px;background:#fff;border:1px solid var(--line);cursor:pointer;font-weight:600;font-size:13px}
+  .tab.act{background:var(--brand);color:#fff;border-color:var(--brand)}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;color:var(--muted);font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--line);padding:7px 6px}
+  td{border-bottom:1px solid #f0f2ee;padding:7px 6px}
+  .num{text-align:right;font-variant-numeric:tabular-nums}
+  .badge{display:inline-block;padding:3px 9px;border-radius:99px;color:#fff;font-weight:700;font-size:11px;letter-spacing:.04em}
+  .CRITICAL{background:var(--crit)}.REORDER{background:var(--reorder)}.OVERSTOCK{background:var(--over)}.OK{background:var(--ok)}
+  .ch{font-size:10.5px;padding:2px 7px;border-radius:6px;background:#e7ecf6;color:#2c4f8a;font-weight:700}
+  .ch.mqtt{background:#f3e8fa;color:#6b2f8a}
+  .muted{color:var(--muted)}
+  .item{padding:8px 0;border-bottom:1px solid #f0f2ee;font-size:12.5px}
+  .legend{display:flex;gap:14px;font-size:12px;color:var(--muted);margin-bottom:6px}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+  .empty{color:var(--muted);padding:40px;text-align:center}
+  svg text{font-family:inherit}
+  .node{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f2ee;font-size:12.5px}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>Smart Retail · Central Demand & Replenishment Dashboard</h1>
+  <div class="sub">Aggregates edge-node predictions · only summaries leave the store, raw POS data stays at the edge</div></div>
+  <div class="right">
+    <span class="chip" id="chMode">—</span>
+    <span class="chip"><span class="dot" id="dNodes"></span><span id="cNodes">No edge nodes</span></span>
+    <span class="chip" id="clock">—</span>
+  </div>
+</header>
+<main>
+  <div class="kpis">
+    <div class="kpi"><span>Edge nodes online</span><b id="kNodes">0</b><small id="kNodesS">waiting for heartbeat</small></div>
+    <div class="kpi"><span>Predictions received</span><b id="kPred">0</b><small id="kChan">—</small></div>
+    <div class="kpi"><span>Products needing stock</span><b id="kAlert" style="color:var(--crit)">0</b><small id="kAlertS">critical + reorder</small></div>
+    <div class="kpi"><span>Units to order</span><b id="kQty">0</b><small>sum of suggested orders</small></div>
+    <div class="kpi"><span>Avg edge latency</span><b id="kLat">—</b><small>local inference, per request</small></div>
+  </div>
+
+  <div class="tabs" id="tabs"></div>
+
+  <div class="g2">
+    <section class="card">
+      <h2>Predicted 7-day demand vs current stock</h2>
+      <div class="legend"><span><i style="background:var(--dem)"></i>7-day predicted demand</span><span><i style="background:var(--stock)"></i>Current stock</span><span><i style="background:var(--crit)"></i>Reorder point</span></div>
+      <div id="chart"></div>
+    </section>
+    <section class="card">
+      <h2>Replenishment alerts</h2>
+      <div id="alerts"></div>
+    </section>
+  </div>
+
+  <div class="g2">
+    <section class="card">
+      <h2>Product-wise demand estimates</h2>
+      <div id="table" style="max-height:640px;overflow:auto"></div>
+    </section>
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <section class="card"><h2>Category demand (next 7 days)</h2><div id="cats"></div></section>
+      <section class="card"><h2>Edge nodes</h2><div id="nodes"></div></section>
+      <section class="card"><h2>Live message feed</h2><div id="feed"></div></section>
+    </div>
+  </div>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const fmt = (n,d=0) => n==null ? "—" : Number(n).toLocaleString("en-IN",{maximumFractionDigits:d,minimumFractionDigits:d});
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let store = "ALL", lastState = null;
+
+function setTabs(stores) {
+  const all = ["ALL", ...stores];
+  $("tabs").innerHTML = all.map(s => `<span class="tab ${s===store?'act':''}" data-s="${s}">${s==="ALL"?"All stores":s}</span>`).join("");
+  document.querySelectorAll(".tab").forEach(t => t.onclick = () => { store = t.dataset.s; render(lastState); });
+}
+
+function render(s) {
+  if (!s) return;
+  lastState = s;
+  $("clock").textContent = "Updated " + s.server_time;
+  $("chMode").textContent = "Receiving via " + s.comm_mode.toUpperCase() + (s.mqtt.enabled ? (s.mqtt.connected ? " · MQTT ✓" : " · MQTT ✗") : "");
+  const online = s.nodes.filter(n => n.online);
+  $("dNodes").className = "dot " + (online.length ? "on" : "off");
+  $("cNodes").textContent = online.length ? `${online.length} edge node online` : (s.nodes.length ? "Edge node offline" : "No edge nodes");
+  $("kNodes").textContent = online.length;
+  $("kNodesS").textContent = s.nodes.length ? s.nodes.map(n => `${n.node_id} · ${n.seconds_ago}s ago`).join(", ") : "waiting for heartbeat";
+  $("kPred").textContent = fmt(s.counts.prediction || 0);
+  $("kChan").textContent = Object.entries(s.channels).map(([k,v]) => `${v} via ${k.toUpperCase()}`).join(" · ") || "—";
+  $("kLat").textContent = s.avg_latency_ms != null ? s.avg_latency_ms + " ms" : "—";
+
+  const stores = [...new Set(s.latest.map(x => x.store_id))].sort();
+  setTabs(stores);
+  const rows = s.latest.filter(x => store === "ALL" || x.store_id === store);
+  const need = rows.filter(x => x.status === "CRITICAL" || x.status === "REORDER");
+  $("kAlert").textContent = need.length;
+  $("kAlertS").textContent = `${rows.filter(x=>x.status==="CRITICAL").length} critical · ${rows.filter(x=>x.status==="REORDER").length} reorder`;
+  $("kQty").textContent = fmt(rows.reduce((a,x) => a + (x.reorder_qty||0), 0));
+
+  // chart (one store at a time keeps it readable)
+  const chartStore = store === "ALL" ? stores[0] : store;
+  const cr = s.latest.filter(x => x.store_id === chartStore).sort((a,b) => b.forecast_7d_total - a.forecast_7d_total);
+  if (!cr.length) $("chart").innerHTML = `<div class="empty">Waiting for predictions from the edge node…<br>Run a prediction or a store scan on the edge UI.</div>`;
+  else {
+    const W=760, rowH=22, left=170, H=cr.length*rowH+30, mx=Math.max(...cr.map(x=>Math.max(x.forecast_7d_total,x.current_stock,x.reorder_point)))*1.05;
+    const sx = v => left + v/mx*(W-left-60);
+    $("chart").innerHTML = `<div class="muted" style="font-size:12px;margin-bottom:4px">${chartStore}${cr[0].store_name ? " · "+esc(cr[0].store_name) : ""}</div>
+     <svg width="100%" viewBox="0 0 ${W} ${H}">` + cr.map((x,i) => {
+      const y = 8 + i*rowH;
+      return `<text x="${left-8}" y="${y+12}" text-anchor="end" font-size="11.5" fill="#1b2320">${esc(x.product_name)}</text>
+        <rect x="${left}" y="${y+1}" width="${sx(x.current_stock)-left}" height="15" rx="3" fill="var(--stock)"/>
+        <rect x="${left}" y="${y+5}" width="${sx(x.forecast_7d_total)-left}" height="7" rx="2" fill="var(--dem)"/>
+        <line x1="${sx(x.reorder_point)}" x2="${sx(x.reorder_point)}" y1="${y-1}" y2="${y+18}" stroke="var(--crit)" stroke-width="2"/>
+        <text x="${Math.max(sx(x.current_stock),sx(x.forecast_7d_total))+6}" y="${y+12}" font-size="10.5" fill="${x.status==='OK'?'#69736e':x.status==='OVERSTOCK'?'#3b6fb6':'#c0392b'}" font-weight="600">${x.status}</text>`;
+    }).join("") + `</svg>`;
+  }
+
+  // table
+  $("table").innerHTML = rows.length ? `<table><thead><tr><th>Store</th><th>Product</th><th class="num">Tomorrow</th><th class="num">7-day</th><th class="num">Stock</th><th class="num">Cover (d)</th><th>Status</th><th class="num">Order</th><th class="num">Edge ms</th></tr></thead><tbody>` +
+    rows.sort((a,b)=>({CRITICAL:0,REORDER:1,OVERSTOCK:2,OK:3}[a.status]-{CRITICAL:0,REORDER:1,OVERSTOCK:2,OK:3}[b.status])).map(x => `<tr><td>${x.store_id}</td><td>${esc(x.product_name)}</td><td class="num">${fmt(x.predicted_demand)}</td><td class="num">${fmt(x.forecast_7d_total)}</td><td class="num">${fmt(x.current_stock)}</td><td class="num">${fmt(x.days_of_cover,1)}</td><td><span class="badge ${x.status}">${x.status}</span></td><td class="num"><b>${x.reorder_qty?fmt(x.reorder_qty):"—"}</b></td><td class="num">${fmt(x.latency_ms)}</td></tr>`).join("") + `</tbody></table>`
+    : `<div class="empty">No product estimates yet.</div>`;
+
+  // categories
+  const cats = {};
+  rows.forEach(x => cats[x.category] = (cats[x.category]||0) + x.forecast_7d_total);
+  const ce = Object.entries(cats).sort((a,b)=>b[1]-a[1]), cm = Math.max(...ce.map(c=>c[1]),1);
+  $("cats").innerHTML = ce.length ? ce.map(([c,v]) => `<div style="display:flex;align-items:center;gap:8px;margin:5px 0;font-size:12.5px"><span style="width:105px">${esc(c)}</span><div style="flex:1;background:#f0f2ee;border-radius:4px"><div style="width:${v/cm*100}%;background:var(--dem);height:12px;border-radius:4px"></div></div><span class="num" style="width:60px">${fmt(v)}</span></div>`).join("") : `<div class="muted">—</div>`;
+
+  $("alerts").innerHTML = s.alerts.length ? s.alerts.filter(a => store==="ALL" || a.store_id===store).slice(0,10).map(a => `<div class="item"><span class="badge ${a.severity}">${a.severity}</span> <span class="ch ${a.channel}">${a.channel.toUpperCase()}</span> <span class="muted">${a.received.slice(11)}</span><br>${esc(a.message)}</div>`).join("") : `<div class="empty">No alerts received.</div>`;
+  $("nodes").innerHTML = s.nodes.length ? s.nodes.map(n => `<div class="node"><span><span class="dot ${n.online?'on':'off'}"></span> <b>${esc(n.node_id)}</b> · ${esc(n.model)}</span><span class="muted">${n.predictions} preds · ${n.pending_sync} queued · ${n.seconds_ago}s ago</span></div>`).join("") : `<div class="muted">No heartbeat yet.</div>`;
+  $("feed").innerHTML = s.feed.length ? s.feed.slice(0,7).map(f => `<div class="item"><span class="ch ${f.channel}">${f.channel.toUpperCase()}</span> <span class="muted">${f.received.slice(11)}</span> ${f.store_id} · ${esc(f.product_name)} → <b>${fmt(f.predicted_demand)}</b> <span class="badge ${f.status}">${f.status}</span></div>`).join("") : `<div class="muted">—</div>`;
+}
+
+async function poll() {
+  try { render(await (await fetch("/api/state")).json()); } catch(e) { $("clock").textContent = "Dashboard API error"; }
+}
+poll(); setInterval(poll, 2000);
+</script>
+</body>
+</html>

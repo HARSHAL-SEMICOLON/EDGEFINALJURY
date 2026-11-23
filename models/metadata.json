@@ -1,0 +1,316 @@
+{
+  "store_codes": {
+    "STR01": 0,
+    "STR02": 1,
+    "STR03": 2
+  },
+  "product_codes": {
+    "P101": 0,
+    "P102": 1,
+    "P103": 2,
+    "P104": 3,
+    "P201": 4,
+    "P202": 5,
+    "P203": 6,
+    "P204": 7,
+    "P301": 8,
+    "P302": 9,
+    "P303": 10,
+    "P304": 11,
+    "P401": 12,
+    "P402": 13,
+    "P403": 14,
+    "P404": 15,
+    "P501": 16,
+    "P502": 17,
+    "P503": 18,
+    "P504": 19,
+    "P601": 20,
+    "P602": 21,
+    "P603": 22,
+    "P604": 23
+  },
+  "category_codes": {
+    "Beverages": 0,
+    "Dairy": 1,
+    "Fresh Produce": 2,
+    "Personal Care": 3,
+    "Snacks": 4,
+    "Staples": 5
+  },
+  "ref_price": {
+    "P101": 696.34,
+    "P102": 492.18,
+    "P103": 176.82,
+    "P104": 51.55,
+    "P201": 59.98,
+    "P202": 37.54,
+    "P203": 96.54,
+    "P204": 62.2,
+    "P301": 305.8,
+    "P302": 343.17,
+    "P303": 101.86,
+    "P304": 117.93,
+    "P401": 21.44,
+    "P402": 32.17,
+    "P403": 117.97,
+    "P404": 48.26,
+    "P501": 213.42,
+    "P502": 305.64,
+    "P503": 112.68,
+    "P504": 139.4,
+    "P601": 42.88,
+    "P602": 34.28,
+    "P603": 40.71,
+    "P604": 64.36
+  },
+  "products": {
+    "P101": {
+      "name": "Basmati Rice 5kg",
+      "category": "Staples"
+    },
+    "P102": {
+      "name": "Wheat Atta 10kg",
+      "category": "Staples"
+    },
+    "P103": {
+      "name": "Toor Dal 1kg",
+      "category": "Staples"
+    },
+    "P104": {
+      "name": "Sugar 1kg",
+      "category": "Staples"
+    },
+    "P201": {
+      "name": "Toned Milk 1L",
+      "category": "Dairy"
+    },
+    "P202": {
+      "name": "Curd 400g",
+      "category": "Dairy"
+    },
+    "P203": {
+      "name": "Paneer 200g",
+      "category": "Dairy"
+    },
+    "P204": {
+      "name": "Butter 100g",
+      "category": "Dairy"
+    },
+    "P301": {
+      "name": "Tea Powder 500g",
+      "category": "Beverages"
+    },
+    "P302": {
+      "name": "Instant Coffee 100g",
+      "category": "Beverages"
+    },
+    "P303": {
+      "name": "Cold Drink 2L",
+      "category": "Beverages"
+    },
+    "P304": {
+      "name": "Mango Juice 1L",
+      "category": "Beverages"
+    },
+    "P401": {
+      "name": "Potato Chips 52g",
+      "category": "Snacks"
+    },
+    "P402": {
+      "name": "Cream Biscuits 120g",
+      "category": "Snacks"
+    },
+    "P403": {
+      "name": "Namkeen Mix 400g",
+      "category": "Snacks"
+    },
+    "P404": {
+      "name": "Chocolate Bar 50g",
+      "category": "Snacks"
+    },
+    "P501": {
+      "name": "Bath Soap 4x100g",
+      "category": "Personal Care"
+    },
+    "P502": {
+      "name": "Shampoo 340ml",
+      "category": "Personal Care"
+    },
+    "P503": {
+      "name": "Toothpaste 150g",
+      "category": "Personal Care"
+    },
+    "P504": {
+      "name": "Detergent Powder 1kg",
+      "category": "Personal Care"
+    },
+    "P601": {
+      "name": "Onion 1kg",
+      "category": "Fresh Produce"
+    },
+    "P602": {
+      "name": "Potato 1kg",
+      "category": "Fresh Produce"
+    },
+    "P603": {
+      "name": "Tomato 1kg",
+      "category": "Fresh Produce"
+    },
+    "P604": {
+      "name": "Banana 1 dozen",
+      "category": "Fresh Produce"
+    }
+  },
+  "stores": {
+    "STR01": "Kothrud SuperMart",
+    "STR02": "Hinjewadi Daily Needs",
+    "STR03": "Hadapsar FreshMart"
+  },
+  "features": [
+    "store_code",
+    "product_code",
+    "category_code",
+    "day_of_week",
+    "day_of_month",
+    "month",
+    "week_of_year",
+    "is_weekend",
+    "is_salary_week",
+    "is_festival",
+    "days_to_festival",
+    "days_since_festival",
+    "is_big_festival_window",
+    "unit_price",
+    "discount_pct",
+    "promo_flag",
+    "effective_price",
+    "price_index",
+    "lag_1",
+    "lag_7",
+    "lag_14",
+    "lag_28",
+    "roll_mean_7",
+    "roll_mean_28",
+    "roll_std_7",
+    "same_weekday_mean_4"
+  ],
+  "target": "units_sold",
+  "model_file": "demand_rf.joblib",
+  "model_type": "RandomForestRegressor",
+  "model_params": {
+    "max_depth": 18,
+    "max_features": 0.6,
+    "min_samples_leaf": 4,
+    "n_estimators": 150
+  },
+  "sklearn_version": "1.9.1",
+  "trained_at": "2026-11-23T08:42:13",
+  "train_range": [
+    "2024-01-29",
+    "2026-06-30"
+  ],
+  "test_range": [
+    "2026-07-01",
+    "2026-11-21"
+  ],
+  "metrics_test": {
+    "MAE": 11.239,
+    "RMSE": 19.267,
+    "R2": 0.8219,
+    "WAPE_%": 22.58,
+    "train_time_s": 3.6
+  },
+  "model_size_mb": 36.79,
+  "edge_latency_ms_single": 7.03,
+  "festivals": [
+    [
+      "2024-01-14",
+      "Makar Sankranti"
+    ],
+    [
+      "2024-03-25",
+      "Holi"
+    ],
+    [
+      "2024-04-11",
+      "Eid al-Fitr"
+    ],
+    [
+      "2024-09-07",
+      "Ganesh Chaturthi"
+    ],
+    [
+      "2024-10-12",
+      "Dussehra"
+    ],
+    [
+      "2024-11-01",
+      "Diwali"
+    ],
+    [
+      "2024-12-25",
+      "Christmas"
+    ],
+    [
+      "2025-01-14",
+      "Makar Sankranti"
+    ],
+    [
+      "2025-03-14",
+      "Holi"
+    ],
+    [
+      "2025-03-31",
+      "Eid al-Fitr"
+    ],
+    [
+      "2025-08-27",
+      "Ganesh Chaturthi"
+    ],
+    [
+      "2025-10-02",
+      "Dussehra"
+    ],
+    [
+      "2025-10-21",
+      "Diwali"
+    ],
+    [
+      "2025-12-25",
+      "Christmas"
+    ],
+    [
+      "2026-01-14",
+      "Makar Sankranti"
+    ],
+    [
+      "2026-03-04",
+      "Holi"
+    ],
+    [
+      "2026-03-20",
+      "Eid al-Fitr"
+    ],
+    [
+      "2026-09-14",
+      "Ganesh Chaturthi"
+    ],
+    [
+      "2026-10-20",
+      "Dussehra"
+    ],
+    [
+      "2026-11-08",
+      "Diwali"
+    ],
+    [
+      "2026-12-25",
+      "Christmas"
+    ],
+    [
+      "2027-01-14",
+      "Makar Sankranti"
+    ]
+  ]
+}

@@ -1,0 +1,27 @@
+# Full edge stack: MQTT broker + edge inference service + central dashboard
+#   docker compose up --build
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2
+    ports: ["1883:1883"]
+    volumes: ["./docker/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro"]
+
+  dashboard:
+    build: { context: ., dockerfile: docker/Dockerfile }
+    command: ["python", "dashboard/app.py"]
+    environment:
+      COMM_MODE: both
+      MQTT_HOST: mosquitto
+    ports: ["8050:8050"]
+    depends_on: [mosquitto]
+
+  edge:
+    build: { context: ., dockerfile: docker/Dockerfile }
+    command: ["python", "edge_service/app.py"]
+    environment:
+      COMM_MODE: both          # HTTP + MQTT to the central dashboard
+      MQTT_HOST: mosquitto
+      DASHBOARD_URL: http://dashboard:8050
+      EDGE_NODE_ID: pune-edge-01
+    ports: ["5000:5000"]
+    depends_on: [mosquitto, dashboard]

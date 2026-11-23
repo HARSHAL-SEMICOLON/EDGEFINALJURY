@@ -1,0 +1,25 @@
+product_id,product_name,category,base_daily_units,base_price,price_elasticity
+P101,Basmati Rice 5kg,Staples,14,649,-0.6
+P102,Wheat Atta 10kg,Staples,18,459,-0.5
+P103,Toor Dal 1kg,Staples,22,165,-0.7
+P104,Sugar 1kg,Staples,26,48,-0.4
+P201,Toned Milk 1L,Dairy,120,56,-0.3
+P202,Curd 400g,Dairy,45,35,-0.5
+P203,Paneer 200g,Dairy,30,90,-0.8
+P204,Butter 100g,Dairy,24,58,-0.7
+P301,Tea Powder 500g,Beverages,16,285,-0.6
+P302,Instant Coffee 100g,Beverages,9,320,-0.8
+P303,Cold Drink 2L,Beverages,28,95,-1.1
+P304,Mango Juice 1L,Beverages,18,110,-1.0
+P401,Potato Chips 52g,Snacks,60,20,-1.2
+P402,Cream Biscuits 120g,Snacks,55,30,-1.0
+P403,Namkeen Mix 400g,Snacks,20,110,-0.9
+P404,Chocolate Bar 50g,Snacks,40,45,-1.1
+P501,Bath Soap 4x100g,Personal Care,15,199,-0.8
+P502,Shampoo 340ml,Personal Care,8,285,-0.9
+P503,Toothpaste 150g,Personal Care,17,105,-0.6
+P504,Detergent Powder 1kg,Personal Care,19,130,-0.7
+P601,Onion 1kg,Fresh Produce,70,40,-0.5
+P602,Potato 1kg,Fresh Produce,75,32,-0.4
+P603,Tomato 1kg,Fresh Produce,60,38,-0.6
+P604,Banana 1 dozen,Fresh Produce,35,60,-0.7

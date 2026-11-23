@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Smart Retail · Edge Node</title>
+<style>
+  :root{
+    --bg:#f4f1ea; --card:#fffdf8; --ink:#1d2421; --muted:#6b736e; --line:#e3ddd0;
+    --brand:#1f5c4f; --brand2:#2f7d6d; --accent:#e08a2c;
+    --crit:#c0392b; --reorder:#d9822b; --over:#3b6fb6; --ok:#2e8b57;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 "Segoe UI",system-ui,-apple-system,sans-serif}
+  header{background:var(--brand);color:#fff;padding:14px 28px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+  header h1{font-size:19px;margin:0;font-weight:650;letter-spacing:.2px}
+  header .sub{opacity:.8;font-size:12.5px}
+  .chips{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+  .chip{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);padding:4px 10px;border-radius:99px;font-size:12px;display:flex;align-items:center;gap:6px}
+  .dot{width:8px;height:8px;border-radius:50%;background:#aaa;display:inline-block}
+  .dot.on{background:#5be08f}.dot.off{background:#ff8a7a}.dot.wait{background:#ffc861}
+  main{max-width:1320px;margin:0 auto;padding:22px 24px 60px}
+  .grid{display:grid;grid-template-columns:380px 1fr;gap:20px}
+  @media(max-width:980px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;box-shadow:0 1px 0 rgba(0,0,0,.03)}
+  .card h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 14px;font-weight:650}
+  label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px;font-weight:600}
+  select,input,textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:#fff;font:inherit;color:var(--ink)}
+  select:focus,input:focus,textarea:focus{outline:2px solid #9cc9bd;border-color:var(--brand2)}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .hint{font-size:11.5px;color:var(--muted);margin-top:3px}
+  button{font:inherit;border:0;border-radius:10px;padding:11px 16px;cursor:pointer;font-weight:650}
+  .btn{background:var(--brand);color:#fff;width:100%;margin-top:16px;font-size:15px}
+  .btn:hover{background:var(--brand2)}
+  .btn2{background:#efe9dc;color:var(--ink)}
+  .btn2:hover{background:#e6dfcf}
+  details{margin-top:12px;border-top:1px dashed var(--line);padding-top:8px}
+  summary{cursor:pointer;color:var(--brand);font-weight:600;font-size:12.5px}
+  .toggle{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px}
+  .toggle input{width:auto}
+  .empty{color:var(--muted);text-align:center;padding:60px 10px}
+  .result-top{display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap}
+  .big{font-size:52px;font-weight:700;line-height:1;color:var(--brand)}
+  .big small{font-size:16px;color:var(--muted);font-weight:500;margin-left:4px}
+  .badge{display:inline-block;padding:5px 12px;border-radius:99px;color:#fff;font-weight:700;font-size:12.5px;letter-spacing:.05em}
+  .CRITICAL{background:var(--crit)}.REORDER{background:var(--reorder)}.OVERSTOCK{background:var(--over)}.OK{background:var(--ok)}
+  .kv{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:18px}
+  .kv div{background:#f7f3ea;border-radius:10px;padding:10px 12px}
+  .kv b{display:block;font-size:19px}
+  .kv span{font-size:11.5px;color:var(--muted)}
+  .reco{margin-top:14px;padding:12px 14px;border-radius:10px;background:#fbf4e6;border-left:4px solid var(--accent)}
+  .warn{margin-top:10px;padding:10px 12px;border-radius:10px;background:#fdeceb;color:#7d2a20;font-size:12.5px}
+  .err{margin-top:12px;padding:12px;border-radius:10px;background:#fdeceb;color:#7d2a20;font-weight:600}
+  .edgeinfo{margin-top:12px;font-size:12px;color:var(--muted)}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;color:var(--muted);font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--line);padding:8px 6px}
+  td{border-bottom:1px solid #efe9dc;padding:8px 6px}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  .sec{margin-top:20px}
+  .flex{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .pill{font-size:12px;padding:3px 9px;border-radius:99px;background:#efe9dc}
+  .muted{color:var(--muted)}
+  svg text{font-family:inherit}
+  .alert-item{padding:8px 0;border-bottom:1px solid #efe9dc;font-size:12.5px}
+  .stockbar{position:relative;height:16px;background:#efe9dc;border-radius:8px;margin:20px 0 26px}
+  .stockbar .fill{position:absolute;left:0;top:0;bottom:0;border-radius:8px}
+  .stockbar .mark{position:absolute;top:-6px;bottom:-6px;width:2px;background:var(--ink)}
+  .stockbar .lbl{position:absolute;top:20px;font-size:11px;color:var(--muted);transform:translateX(-50%);white-space:nowrap}
+  .spin{opacity:.55;pointer-events:none}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Smart Retail · Demand Prediction Edge Node</h1>
+    <div class="sub">Node <b>{{ node_id }}</b> · local Random Forest inference · Applied Edge Analytics</div>
+  </div>
+  <div class="chips">
+    <span class="chip"><span class="dot on" id="dModel"></span><span id="cModel">Model loading…</span></span>
+    <span class="chip"><span class="dot wait" id="dSync"></span><span id="cSync">Sync…</span></span>
+    <span class="chip" id="cStats">—</span>
+  </div>
+</header>
+
+<main>
+<div class="grid">
+  <!-- ======== INPUT ======== -->
+  <section class="card">
+    <h2>Product input</h2>
+    <label>Store</label>
+    <select id="store"></select>
+    <label>Product</label>
+    <select id="product"></select>
+    <div class="hint" id="ctxHint"></div>
+
+    <div class="row2">
+      <div><label>Forecast date</label><input type="date" id="date"></div>
+      <div><label>Current stock (units)</label><input type="number" id="stock" min="0"></div>
+    </div>
+    <div class="row3">
+      <div><label>Unit price (₹)</label><input type="number" id="price" step="0.01"></div>
+      <div><label>Discount %</label><input type="number" id="discount" min="0" max="90" value="0"></div>
+      <div><label>Lead time (d)</label><input type="number" id="lead" min="1" max="30"></div>
+    </div>
+    <div class="toggle"><input type="checkbox" id="promo"><label for="promo" style="margin:0">On promotion / special display</label></div>
+
+    <details>
+      <summary>Recent sales (last 28 days) — auto-filled from the edge store</summary>
+      <div id="spark" style="margin-top:8px"></div>
+      <label>Edit for a what-if scenario (comma-separated, oldest → newest)</label>
+      <textarea id="recent" rows="3"></textarea>
+      <div class="toggle"><input type="checkbox" id="useRecent"><label for="useRecent" style="margin:0">Use these values instead of stored history</label></div>
+    </details>
+
+    <button class="btn" id="go">Predict demand at the edge</button>
+    <div class="flex" style="margin-top:10px">
+      <button class="btn2" id="scan" style="flex:1">Scan whole store</button>
+      <button class="btn2" id="restock" style="flex:1">Receive restock</button>
+    </div>
+    <div id="formErr"></div>
+  </section>
+
+  <!-- ======== RESULT ======== -->
+  <section class="card" id="resultCard">
+    <h2>Edge prediction</h2>
+    <div id="result"><div class="empty">Choose a product and press <b>Predict</b>.<br>Inference runs on this device — no cloud call.</div></div>
+  </section>
+</div>
+
+<section class="card sec">
+  <div class="flex" style="justify-content:space-between"><h2 style="margin:0">Batch prediction · CSV upload</h2><span class="muted" id="batchMeta"></span></div>
+  <div class="flex" style="margin-top:12px">
+    <input type="file" id="batchFile" accept=".csv" style="max-width:340px">
+    <button class="btn2" id="batchRun" style="background:var(--brand);color:#fff">Run batch at the edge</button>
+    <a href="/api/batch/template" class="btn2" style="text-decoration:none;padding:11px 16px;border-radius:10px;font-weight:650;color:var(--ink)">Download template</a>
+    <button class="btn2" id="batchExport" style="display:none">Export results CSV</button>
+  </div>
+  <div class="hint" style="margin-top:6px">Columns: <b>store_id, product_id</b> (required) · date, unit_price, discount_pct, promo_flag, current_stock, lead_time_days (optional — blanks use edge-store values). Max 200 rows. Invalid rows are reported, valid rows are still predicted.</div>
+  <div id="batchOut" style="padding-top:10px"></div>
+</section>
+
+<section class="card sec">
+  <div class="flex" style="justify-content:space-between"><h2 style="margin:0">Store-wide replenishment scan</h2><span class="muted" id="scanMeta"></span></div>
+  <div id="scanOut" class="muted" style="padding:14px 0">Press <b>Scan whole store</b> to forecast every product and flag what needs replenishment.</div>
+</section>
+
+<div class="grid sec" style="grid-template-columns:1fr 1fr">
+  <section class="card"><h2>Recent edge predictions</h2><div id="hist"></div></section>
+  <section class="card"><h2>Local alerts</h2><div id="alerts"></div></section>
+</div>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+let catalog = null, ctx = null;
+const fmt = (n, d=0) => n==null ? "—" : Number(n).toLocaleString("en-IN",{maximumFractionDigits:d, minimumFractionDigits:d});
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+async function api(path, opts={}) {
+  const r = await fetch(path, {headers:{"Content-Type":"application/json","X-Source":"store-ui"}, ...opts});
+  const j = await r.json();
+  if (!r.ok || j.ok === false) throw new Error(j.error || r.statusText);
+  return j;
+}
+
+async function init() {
+  catalog = await api("/api/catalog");
+  $("store").innerHTML = Object.entries(catalog.stores).map(([k,v]) => `<option value="${k}">${k} · ${esc(v)}</option>`).join("");
+  const byCat = {};
+  Object.entries(catalog.products).forEach(([k,p]) => (byCat[p.category] ??= []).push([k,p]));
+  $("product").innerHTML = Object.entries(byCat).map(([c,items]) =>
+    `<optgroup label="${esc(c)}">` + items.map(([k,p]) => `<option value="${k}">${k} · ${esc(p.name)}</option>`).join("") + `</optgroup>`).join("");
+  $("store").value = "STR02"; $("product").value = "P201";
+  $("store").onchange = $("product").onchange = loadContext;
+  $("go").onclick = predict; $("scan").onclick = scan; $("restock").onclick = restock;
+  $("batchRun").onclick = runBatch; $("batchExport").onclick = exportBatch;
+  await loadContext(); refreshSide(); setInterval(refreshSide, 4000);
+}
+
+async function loadContext() {
+  try {
+    ctx = await api(`/api/context?store_id=${$("store").value}&product_id=${$("product").value}`);
+    $("date").value = ctx.suggested_date; $("price").value = ctx.unit_price;
+    $("stock").value = ctx.current_stock; $("lead").value = ctx.lead_time_days;
+    $("discount").value = 0; $("promo").checked = false; $("useRecent").checked = false;
+    $("recent").value = ctx.recent_sales.join(", ");
+    const fest = ctx.upcoming_festivals.length ? ` · upcoming: ${ctx.upcoming_festivals.map(f=>`${f.festival} in ${f.days_away}d`).join(", ")}` : "";
+    $("ctxHint").textContent = `${ctx.category} · last POS data ${ctx.last_sales_date} · usual price ₹${ctx.reference_price}${fest}`;
+    $("spark").innerHTML = sparkline(ctx.recent_sales);
+  } catch(e) { $("formErr").innerHTML = `<div class="err">${esc(e.message)}</div>`; }
+}
+
+function sparkline(vals, w=330, h=46) {
+  const mx = Math.max(...vals, 1), step = w/(vals.length-1);
+  const pts = vals.map((v,i)=>`${(i*step).toFixed(1)},${(h-4-(v/mx)*(h-8)).toFixed(1)}`).join(" ");
+  return `<svg width="100%" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><polyline points="${pts}" fill="none" stroke="#2f7d6d" stroke-width="2"/></svg>
+          <div class="hint">28-day sales · avg ${fmt(vals.reduce((a,b)=>a+b,0)/vals.length,1)}/day · max ${fmt(mx)}</div>`;
+}
+
+function payload(productId) {
+  const p = {store_id:$("store").value, product_id:productId || $("product").value, date:$("date").value,
+             unit_price:$("price").value, discount_pct:$("discount").value || 0, promo_flag:$("promo").checked?1:0,
+             current_stock:$("stock").value, lead_time_days:$("lead").value};
+  if ($("useRecent").checked) p.recent_sales = $("recent").value;
+  return p;
+}
+
+async function predict() {
+  $("formErr").innerHTML = ""; $("resultCard").classList.add("spin");
+  try {
+    const r = await api("/api/predict", {method:"POST", body:JSON.stringify(payload())});
+    renderResult(r); refreshSide();
+  } catch(e) {
+    $("result").innerHTML = `<div class="err">Input rejected by edge service: ${esc(e.message)}</div>`;
+  } finally { $("resultCard").classList.remove("spin"); }
+}
+
+function renderResult(r) {
+  const maxv = Math.max(r.current_stock, r.reorder_point, r.forecast_7d_total) * 1.08 || 1;
+  const pct = v => Math.min(100, v / maxv * 100).toFixed(1);
+  const color = {CRITICAL:"var(--crit)",REORDER:"var(--reorder)",OVERSTOCK:"var(--over)",OK:"var(--ok)"}[r.status];
+  const fest = r.festival_context.length ? `<span class="pill">🎉 ${r.festival_context.map(f=>`${esc(f.festival)} ${f.days_away===0?"today":"in "+f.days_away+"d"}`).join(" · ")}</span>` : "";
+  $("result").innerHTML = `
+    <div class="result-top">
+      <div>
+        <div class="muted" style="font-size:12.5px">${esc(r.product_name)} · ${esc(r.store_name)} · ${r.target_date}</div>
+        <div class="big">${fmt(r.predicted_demand)}<small>units expected</small></div>
+        <div class="muted" style="font-size:12.5px;margin-top:4px">80% range ${fmt(r.prediction_interval_80[0])} – ${fmt(r.prediction_interval_80[1])} units</div>
+      </div>
+      <div style="margin-left:auto;text-align:right">
+        <span class="badge ${r.status}">${r.status}</span>
+        <div style="margin-top:8px">${fest}</div>
+      </div>
+    </div>
+    <div class="kv">
+      <div><b>${fmt(r.forecast_7d_total)}</b><span>7-day demand</span></div>
+      <div><b>${fmt(r.current_stock)}</b><span>current stock</span></div>
+      <div><b>${fmt(r.reorder_point)}</b><span>reorder point</span></div>
+      <div><b style="color:${r.reorder_qty? 'var(--crit)':'inherit'}">${fmt(r.reorder_qty)}</b><span>suggested order qty</span></div>
+    </div>
+    <div class="stockbar">
+      <div class="fill" style="width:${pct(r.current_stock)}%;background:${color}"></div>
+      <div class="mark" style="left:${pct(r.reorder_point)}%"></div>
+      <div class="lbl" style="left:${pct(r.reorder_point)}%">reorder point</div>
+      <div class="mark" style="left:${pct(r.forecast_7d_total)}%;background:#999"></div>
+      <div class="lbl" style="left:${pct(r.forecast_7d_total)}%">7-day demand</div>
+    </div>
+    ${forecastChart(r.forecast_7d)}
+    <div class="reco"><b>Recommendation:</b> ${esc(r.recommendation)}${r.reorder_qty?` → order <b>${fmt(r.reorder_qty)}</b> units.`:""}</div>
+    ${r.warnings.map(w=>`<div class="warn">⚠ ${esc(w)}</div>`).join("")}
+    <div class="edgeinfo">⚡ Inferred locally on <b>${esc(r.edge.node)}</b> by ${r.edge.model} in <b>${r.edge.latency_ms} ms</b> · history: ${esc(r.inputs_used.history_source)} · summary queued for central dashboard</div>`;
+}
+
+function forecastChart(fc) {
+  const w=620,h=150,pad=26, mx=Math.max(...fc.map(d=>d.units),1)*1.15, bw=(w-pad*2)/fc.length;
+  const days=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const bars = fc.map((d,i)=>{
+    const bh=(d.units/mx)*(h-pad-20), x=pad+i*bw+bw*0.18, y=h-pad-bh, dt=new Date(d.date+"T00:00");
+    return `<rect x="${x}" y="${y}" width="${bw*0.64}" height="${bh}" rx="4" fill="${i?'#9cc9bd':'#1f5c4f'}"/>
+      <text x="${x+bw*0.32}" y="${y-5}" text-anchor="middle" font-size="11" fill="#1d2421">${fmt(d.units)}</text>
+      <text x="${x+bw*0.32}" y="${h-pad+14}" text-anchor="middle" font-size="10.5" fill="#6b736e">${days[dt.getDay()]} ${dt.getDate()}</text>`;}).join("");
+  return `<div class="muted" style="font-size:12px;font-weight:600;margin-top:6px">7-DAY DEMAND FORECAST</div>
+    <svg width="100%" viewBox="0 0 ${w} ${h}">${bars}<line x1="${pad}" x2="${w-pad}" y1="${h-pad}" y2="${h-pad}" stroke="#e3ddd0"/></svg>`;
+}
+
+async function scan() {
+  $("scanOut").innerHTML = "Forecasting all products locally…";
+  try {
+    const r = await api("/api/predict/batch", {method:"POST", body:JSON.stringify({store_id:$("store").value})});
+    $("scanMeta").innerHTML = Object.entries(r.summary).map(([k,v])=>`<span class="badge ${k}" style="margin-left:6px">${k} ${v}</span>`).join("") +
+      ` <span style="margin-left:8px">${r.results.length} products in ${fmt(r.total_ms)} ms</span>`;
+    $("scanOut").innerHTML = `<table><thead><tr><th>Product</th><th>Category</th><th class="num">Tomorrow</th><th class="num">7-day demand</th>
+      <th class="num">Stock</th><th class="num">Days cover</th><th class="num">Reorder pt</th><th>Status</th><th class="num">Order qty</th></tr></thead><tbody>` +
+      r.results.map(x=>`<tr><td><b>${x.product_id}</b> ${esc(x.product_name)}</td><td>${esc(x.category)}</td>
+        <td class="num">${fmt(x.predicted_demand)}</td><td class="num">${fmt(x.forecast_7d_total)}</td><td class="num">${fmt(x.current_stock)}</td>
+        <td class="num">${fmt(x.days_of_cover,1)}</td><td class="num">${fmt(x.reorder_point)}</td><td><span class="badge ${x.status}">${x.status}</span></td>
+        <td class="num"><b>${x.reorder_qty?fmt(x.reorder_qty):"—"}</b></td></tr>`).join("") + `</tbody></table>`;
+    $("scanOut").classList.remove("muted"); refreshSide();
+  } catch(e) { $("scanOut").innerHTML = `<div class="err">${esc(e.message)}</div>`; }
+}
+
+async function restock() {
+  const n = prompt("Units received from supplier for " + $("product").selectedOptions[0].text, "200");
+  if (n === null) return;
+  try {
+    const r = await api("/api/inventory", {method:"POST", body:JSON.stringify({store_id:$("store").value, product_id:$("product").value, add_units:n})});
+    $("stock").value = r.current_stock; $("formErr").innerHTML = `<div class="hint" style="color:var(--ok)">Stock updated → ${fmt(r.current_stock)} units</div>`;
+  } catch(e) { $("formErr").innerHTML = `<div class="err">${esc(e.message)}</div>`; }
+}
+
+async function refreshSide() {
+  try {
+    const h = await api("/api/health");
+    $("cModel").textContent = `${h.model} · R² ${h.test_metrics.R2}`;
+    const c = h.comms, online = c.mode==="mqtt" ? c.mqtt_ok : c.http_ok;
+    $("dSync").className = "dot " + (online ? "on" : online===false ? "off" : "wait");
+    $("cSync").textContent = (online ? `Dashboard synced (${c.mode.toUpperCase()})` : online===false ? `Offline — ${h.pending_sync} queued` : "Connecting…") + (h.pending_sync && online ? ` · ${h.pending_sync} pending` : "");
+    $("cStats").textContent = `${h.predictions} predictions · ${h.alerts} alerts`;
+    const hist = await api("/api/history?limit=8");
+    $("hist").innerHTML = hist.length ? `<table><thead><tr><th>Time</th><th>Product</th><th class="num">Pred.</th><th>Status</th><th class="num">ms</th></tr></thead><tbody>` +
+      hist.map(x=>`<tr><td>${x.ts.slice(11)}</td><td>${x.store_id} · ${esc(x.product_name)}</td><td class="num">${fmt(x.predicted_units)}</td><td><span class="badge ${x.status}">${x.status}</span></td><td class="num">${fmt(x.latency_ms)}</td></tr>`).join("") + `</tbody></table>`
+      : `<div class="muted">No predictions yet.</div>`;
+    const al = await api("/api/alerts");
+    $("alerts").innerHTML = al.length ? al.slice(0,8).map(a=>`<div class="alert-item"><span class="badge ${a.severity}" style="font-size:10.5px">${a.severity}</span> <span class="muted">${a.ts.slice(11)}</span><br>${esc(a.message)}</div>`).join("")
+      : `<div class="muted">No replenishment alerts.</div>`;
+  } catch(e) { $("dModel").className="dot off"; $("cModel").textContent="Edge service unreachable"; }
+}
+let batchResults = null;
+async function runBatch() {
+  const f = $("batchFile").files[0];
+  if (!f) { $("batchOut").innerHTML = `<div class="err">Choose a CSV file first (or download the template).</div>`; return; }
+  const fd = new FormData(); fd.append("file", f);
+  $("batchOut").innerHTML = `<div class="muted">Running ${esc(f.name)} through the local model…</div>`; $("batchExport").style.display = "none";
+  try {
+    const r = await fetch("/api/predict/upload", {method:"POST", body:fd}); const j = await r.json();
+    if (!r.ok || j.ok === false) throw new Error(j.error || r.statusText);
+    batchResults = j.results;
+    $("batchMeta").innerHTML = `<span class="pill">${j.rows} rows</span> <span class="badge OK">${j.predicted} predicted</span> ` +
+      (j.rejected ? `<span class="badge CRITICAL">${j.rejected} rejected</span> ` : "") +
+      Object.entries(j.summary).filter(([,v])=>v).map(([k,v])=>`<span class="badge ${k}">${k} ${v}</span>`).join(" ") +
+      ` <span style="margin-left:6px">order ${fmt(j.units_to_order)} units · ${fmt(j.total_ms)} ms</span>`;
+    $("batchOut").innerHTML = `<table><thead><tr><th>Row</th><th>Store</th><th>Product</th><th>Date</th><th class="num">Predicted</th><th class="num">7-day</th><th class="num">Stock</th><th>Status</th><th class="num">Order qty</th><th>Notes</th></tr></thead><tbody>` +
+      j.results.map(x => x.ok
+        ? `<tr><td>${x.row}</td><td>${x.store_id}</td><td>${esc(x.product_name)}</td><td>${x.target_date}</td><td class="num"><b>${fmt(x.predicted_demand)}</b></td><td class="num">${fmt(x.forecast_7d_total)}</td><td class="num">${fmt(x.current_stock)}</td><td><span class="badge ${x.status}">${x.status}</span></td><td class="num"><b>${x.reorder_qty?fmt(x.reorder_qty):"—"}</b></td><td class="muted" style="font-size:12px">${x.warnings.length?"⚠ "+esc(x.warnings[0]):""}</td></tr>`
+        : `<tr style="background:#fdf1ef"><td>${x.row}</td><td>${esc(x.input.store_id||"")}</td><td>${esc(x.input.product_id||"")}</td><td>${esc(x.input.date||"")}</td><td colspan="5"><span class="badge CRITICAL">REJECTED</span></td><td style="color:#7d2a20;font-size:12px">${esc(x.error)}</td></tr>`).join("") + `</tbody></table>`;
+    $("batchExport").style.display = ""; refreshSide();
+  } catch(e) { $("batchOut").innerHTML = `<div class="err">Batch rejected: ${esc(e.message)}</div>`; }
+}
+function exportBatch() {
+  if (!batchResults) return;
+  const head = ["row","result","store_id","product_id","product_name","target_date","predicted_demand","interval_low","interval_high","forecast_7d_total","current_stock","reorder_point","status","reorder_qty","recommendation","warning_or_error"];
+  const q = v => `"${String(v ?? "").replace(/"/g,'""')}"`;
+  const lines = batchResults.map(x => x.ok
+    ? [x.row,"predicted",x.store_id,x.product_id,x.product_name,x.target_date,x.predicted_demand,x.prediction_interval_80[0],x.prediction_interval_80[1],x.forecast_7d_total,x.current_stock,x.reorder_point,x.status,x.reorder_qty,x.recommendation,x.warnings.join(" | ")]
+    : [x.row,"rejected",x.input.store_id,x.input.product_id,"",x.input.date,"","","","","","","","","",x.error]);
+  const blob = new Blob([[head, ...lines].map(r => r.map(q).join(",")).join("\n")], {type:"text/csv"});
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "batch_predictions.csv"; a.click();
+}
+init();
+</script>
+</body>
+</html>
